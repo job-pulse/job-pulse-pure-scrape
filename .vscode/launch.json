@@ -1,0 +1,20 @@
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "run main",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py", // Change this path to your main.py file
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                // "--run_swe",
+                // "--run_pm",
+                "--run_pure",
+                // "--send_email"
+            ]
+        }
+    ]
+}
