@@ -1,2 +1,6 @@
 .DS_Store
 *.pyc
+*firebase*.json
+src/util/firebase_handler.py
+logs/*
+.env
