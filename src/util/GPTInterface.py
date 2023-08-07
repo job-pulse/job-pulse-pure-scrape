@@ -4,9 +4,8 @@ from models import JobCategory, ExperienceCategory
 from dotenv import load_dotenv
 import os
 
-# openai.api_key = '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'
-load_dotenv()  # Load environment variables from .env file
 
+load_dotenv()  # Load environment variables from .env file
 openai.api_key = os.getenv("OPENAI_API_KEY")
 NUMBER_PRINTER = "You are a helpful number printer that print a number and the number only"
 YES_NO_PRINTER = "You are a helpful yes/no printer that print 'yes' or 'no' and the word only"
