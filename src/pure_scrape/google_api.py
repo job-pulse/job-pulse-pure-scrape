@@ -84,7 +84,7 @@ def filter_links(job_listings):
         if any(re.search(f"{keyword}", title, re.IGNORECASE) for keyword in grad_keywords):
             grad_links.append({"title": title, "link": link, "snippet":snippet})
         if any(re.search(f"{keyword}", title, re.IGNORECASE) for keyword in intern_keywords):
-            intern_links.append({"title": title, "link": link})
+            intern_links.append({"title": title, "link": link, "snippet":snippet})
 
     return grad_links, intern_links
 
