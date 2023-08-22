@@ -1,12 +1,20 @@
 import sys
 import logging
 
+import os
+import logging
+
 def global_exception_handler(type, value, tb):
     logging.error("Uncaught exception", exc_info=(type, value, tb))
 
 sys.excepthook = global_exception_handler
 
 def setup_logging(log_filename, log_format='%(asctime)s %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p'):
+    # Ensure the directory exists
+    log_directory = os.path.dirname(log_filename)
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+
     # Check if logging is already configured
     if not logging.getLogger().handlers:
         # Set up logging to a file
