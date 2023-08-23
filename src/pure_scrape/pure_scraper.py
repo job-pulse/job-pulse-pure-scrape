@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from .country import standardize_country
 import pytz
 from util.GPTInterface import gpt_check_job_title, gpt_get_yoe_from_jd
@@ -45,9 +46,17 @@ class PureScraper(ABC):
         # set up driver (It's stupid to upload the driver to github, but this is convenient for now)
         system = platform.system()
         if system == "Linux":
+            logging.info("----------Linux------")
+
             self.chrome_executable_path = "./chromedriver_linux"
         elif system == "Darwin":  # MacOS is recognized as 'Darwin' by platform.system()
+            logging.info("----------MAC------")
+            
             self.chrome_executable_path = "./chromedriver"
+        elif system == "Windows":  # MacOS is recognized as 'Darwin' by platform.system()
+            logging.info("----------Windows------")
+            self.chrome_executable_path = "./chromedriver.exe"
+
         else:
             raise Exception(f"Unsupported OS: {system}")
    
@@ -115,8 +124,9 @@ class PureScraper(ABC):
         # init driver
         options = Options()
         options.add_argument("--headless") # Ensure GUI is off. Remove if you want to see the browser.
-        driver = webdriver.Chrome(executable_path=self.chrome_executable_path, options=options)
-
+        # driver = webdriver.Chrome(executable_path=self.chrome_executable_path, options=options)
+        service = Service(self.chrome_executable_path)
+        driver = webdriver.Chrome(service=service, options=options)
         if "software" in self.query.lower():
             self.current_job_category = JobCategory.Software_Engineer
         else:   

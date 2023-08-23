@@ -1,0 +1,31 @@
+name: Run Python Script on Multiple OS
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.11]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run the script
+      run: python src/main.py --run_pure
+      env:
+        GOOGLE_API_ID: ${{ secrets.GOOGLE_API_ID }}
+        GOOGLE_CX_ID: ${{ secrets.GOOGLE_CX_ID }}

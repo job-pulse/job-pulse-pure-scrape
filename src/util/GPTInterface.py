@@ -7,6 +7,16 @@ import time
 
 load_dotenv()  # Load environment variables from .env file
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+try:
+    response = openai.Completion.create(engine="davinci", prompt="Testing for key validity", max_tokens=50)
+    logging.info(response.choices[0].text.strip())
+    openai_key = True
+
+except Exception as e:
+    logging.info(f"Error: {e}")
+    openai_key = False
+
 NUMBER_PRINTER = "You are a helpful number printer that prints a number and the number only."
 YES_NO_PRINTER = "You are a helpful yes/no printer that prints 'yes' or 'no' and the word only."
 
@@ -15,6 +25,8 @@ RETRY_DELAY = 5  # in seconds
 
 def ask_gpt(input_ask, role):
     attempts = 0
+    if not openai_key:
+        return ''
     while attempts < MAX_RETRIES:
         try:
             completion = openai.ChatCompletion.create(

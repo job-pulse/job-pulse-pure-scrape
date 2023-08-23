@@ -13,11 +13,12 @@ def search_jobs(query, site, num_results=10, day=1):
     job_listings = []
     load_dotenv()
     # API Key and Search Engine ID
-    api_key = os.getenv('GOOGLE_API_KEY')
+    api_key = os.getenv('GOOGLE_API_ID')
     cx = os.getenv('GOOGLE_CX_ID')
     if api_key is None or cx is None:
         raise Exception('Failed to get Google API key or CX ID from environment variable')
-    
+    print("api_key: ", api_key)
+    print(cx)
     date_restrict= "d" + str(day)
     
     # Loop through pages in multiples of 10 for pagination
@@ -36,8 +37,8 @@ def search_jobs(query, site, num_results=10, day=1):
         # Request to the API
         res = requests.get(url, params=params)
         
-        # print(res.status_code)
-        # print(res.text)
+        print(res.status_code)
+        print(res.text)
 
         if res.status_code == 200:
 
