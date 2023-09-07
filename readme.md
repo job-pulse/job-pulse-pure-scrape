@@ -70,4 +70,16 @@ Happy Coding!
 
 *This README is subject to updates, please stay tuned for any changes.*
 
+jobPosting schema class
+   Mandatory:
+   - apply_link: str
+   - company: str
+   - date_added: str
+   - title: str
+
+   Optional:
+   - description: str
+   - location: str
+   - category: "Software Engineer"
+   - title_correct_by_gpt: True
 
