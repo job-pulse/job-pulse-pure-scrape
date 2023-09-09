@@ -3,8 +3,8 @@ import pandas as pd
 from io import StringIO
 import json, re, os
 
-if not os.path.exists('gitRepoPostings'):
-    os.makedirs('gitRepoPostings')
+if not os.path.exists('getRepoPostings'):
+    os.makedirs('getRepoPostings')
 
 def get_content(url):
     response = requests.get(url)
@@ -110,7 +110,7 @@ def fetch_and_save_data(urls, output_filename, country):
             result.append(data)
 
     # Save all_json_data to the file
-    with open('gitRepoPostings/' +output_filename, 'w') as f:
+    with open('getRepoPostings/' +output_filename, 'w') as f:
         json.dump(result, f, indent=2)
     print(f'Saved combined JSON data to {output_filename}')
     return result
