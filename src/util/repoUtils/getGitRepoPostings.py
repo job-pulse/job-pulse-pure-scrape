@@ -2,9 +2,12 @@ import requests
 import pandas as pd
 from io import StringIO
 import json, re, os
+from .strTodatetimeObject import parse_date
+from .regexParser import *
+from datetime import datetime
 
-if not os.path.exists('gitRepoPostings'):
-    os.makedirs('gitRepoPostings')
+if not os.path.exists('getRepoPostings'):
+    os.makedirs('getRepoPostings')
 
 def get_content(url):
     response = requests.get(url)
@@ -17,13 +20,6 @@ def to_csv(content):
     table_lines  = '\n'.join([line.strip() for line in table_content.split('\n') if '🔒' not in line])
     return table_lines
 
-def extract_url(text):
-    urls = re.findall('https?://(?:[-\w.]|(?:%[\da-fA-F]{2})|[/])+', str(text))
-    return urls[0] if urls else text
-
-def slash_replacer(text):
-    return text.replace(r'\/', '/')
-
 def to_json(table_df):
     # table_df = table_df.applymap(extract_url)
     table_json = table_df.to_json(orient='records', lines=True, indent=2)
@@ -35,13 +31,13 @@ def map_keys(key):
     if any(keyword in key for keyword in ["Company", "Name", "Firm"]):
         return "company"
     elif any(keyword in key for keyword in ["Roles", "Application", "Link", "Title"]):
-        return "link"
+        return "apply_link"
     elif any(keyword in key for keyword in ["Added On", "Date Posted"]) or "date" in key.lower():
         return "date"
     else:
         return None
 
-def to_conform_json(data):
+def conform_json_keys(data):
     dict_strings = data.strip().split('\n\n')
     # Parse each dictionary string and append to the result list
     lines = [json.loads(dict_string) for dict_string in dict_strings]
@@ -49,7 +45,8 @@ def to_conform_json(data):
     for record in lines:
         new_record = {}
         for key, value in record.items():
-
+            if any(keyword in key for keyword in ['Role', 'Title', 'Roles']):
+                new_record['title'] = value
             new_key = map_keys(key)
             if new_key:
                 new_record[new_key] = value
@@ -59,7 +56,8 @@ def to_conform_json(data):
 def to_clean_json_values(data, country):
     transformed_data = []
     for record in data:
-
+        if "date" not in record or record["date"] == parse_date(record["date"]):
+            continue
         new_record = {
             "title" : "Software Engineer",
             "description" : "",
@@ -71,11 +69,23 @@ def to_clean_json_values(data, country):
         for key, value in record.items():
             if key == "company":
 
-                match = re.search(r'\[([^]]+)\]', value)
+                match = get_text_display(value)
 
                 new_record[key.lower()] = match.group(1) if match else value
-            elif key == "link":
-                new_record["link"] = extract_url(value)
+
+            elif key == "date":
+                new_record['date'] = parse_date(value)
+
+            elif key == "apply_link":
+                new_record["apply_link"] = extract_url(value)
+
+            elif key == "title":
+                match = get_text_display(value)
+                extracted_title = match.group(1) if match else value
+                cleaned_title = remove_special_chars(extracted_title)
+
+                new_record["title"] = cleaned_title 
+
             else:
                 new_record[key.lower()] = value.strip()
         transformed_data.append(new_record)
@@ -86,7 +96,7 @@ def get_table_as_json(url, country):
     table_content = to_csv(content)
     table_df = pd.read_csv(StringIO(table_content), delimiter='|', skipinitialspace=True, on_bad_lines='skip')
     table_json = to_json(table_df)
-    conform_json = to_conform_json(table_json)
+    conform_json = conform_json_keys(table_json)
     cleaned_json_value = to_clean_json_values(conform_json, country)
 
     return json.dumps(cleaned_json_value, indent=4, ensure_ascii=False)
@@ -102,15 +112,24 @@ def fetch_and_save_data(urls, output_filename, country):
         table_json = json.loads(get_table_as_json(url, country))
         all_json_data.extend(table_json)  # Extend the list with data from the current URL
 
+    result_to_file = []
     result = []
+
     for data in all_json_data:
-        if not(any(character.isalpha() for character in data['company'] )):
-            print(data)
-        else:
+        if (any(character.isalpha() for character in data['company'] )):
+            if isinstance(data, str): # convert to datetime object for firebase insertion
+                data['date'] = pd.to_datetime(data['date'], errors='coerce', format='%Y/%m/%d')
             result.append(data)
 
+            if isinstance(data, pd.DataFrame) and 'date' in data.columns: 
+                # to string for insert to json file
+                data['date'] = data['date'].apply(lambda x: x.strftime('%Y/%m/%d') if isinstance(x, datetime.datetime) else x)
+            result_to_file.append(data)
+            
     # Save all_json_data to the file
-    with open('gitRepoPostings/' +output_filename, 'w') as f:
-        json.dump(result, f, indent=2)
+
+
+    with open('getRepoPostings/' +output_filename, 'w') as f:
+        json.dump(result_to_file, f, indent=2)
     print(f'Saved combined JSON data to {output_filename}')
     return result

@@ -1,7 +1,10 @@
-from util.getGitRepoPostings import fetch_and_save_data
+import sys
+sys.path.append('../') 
+
+from util.repoUtils.getGitRepoPostings import fetch_and_save_data
 from util.firebase_handler import FirebaseHandler
 
-from util.constants import ng_us_urls, intern_us_urls, \
+from util.repoUtils.gitConstants import ng_us_urls, intern_us_urls, \
   ng_us_output_filename, intern_us_output_filename
 
 def run_git_scrape():
@@ -16,3 +19,5 @@ def run_git_scrape():
 
     for data in intern_us_postings:
         firebase_handler.add_job(data, 'all_companies') 
+
+run_git_scrape()
