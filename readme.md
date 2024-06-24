@@ -1,3 +1,5 @@
+# [NOTICE] This repo is deprecated. Open sourcing it didn't work.
+
 # JobPulse.fyi Open Source Web Scraper
 
 [JobPulse.fyi](https://jobpulse.fyi/?utm_source=github) is a powerful tool that tracks software engineering and product manager openings tailored for students. This repository is a part of the JobPulse.fyi project and is designed to scrape job information from company websites using Google's API.
